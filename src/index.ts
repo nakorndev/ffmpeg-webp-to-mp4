@@ -33,6 +33,7 @@ async function run() {
   } finally {
     await rm(tempWebp)
     await rm(tempGif)
+    await rm(tempMp4)
   }
 }
 
