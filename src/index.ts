@@ -12,26 +12,27 @@ const options = program
 const { url, output } = options
 
 async function run() {
-  const tempInput = '_temp_input.webp'
-  const tempDir = '_temp_input'
+  const tempWebp = '_temp_input.webp'
+  const tempGif = '_temp_input.gif'
+  const tempMp4 = '_temp_input.mp4'
   try {
     console.log('Downloading file...')
     const arrayBuffer = await ofetch(url, {
       responseType: 'arrayBuffer'
     })
     const buffer = Buffer.from(arrayBuffer)
-    await writeFile(tempInput, buffer)
-    console.log('Extract file...')
-    await mkdir(tempDir, { recursive: true })
-    execSync(`magick convert "${tempInput}" "${tempDir}/frame_%05d.png"`)
-    console.log('Converting file...')
-    execSync(`ffmpeg -r 25 -i "${tempDir}/frame_%05d.png" -c:v libx264 -pix_fmt yuv420p -y "${output}"`)
+    await writeFile(tempWebp, buffer)
+    console.log('Convert to GIF file...')
+    execSync(`magick convert -format gif ${tempWebp} ${tempGif}`)
+    console.log('Convert to MP4 file...')
+    execSync(`ffmpeg -i ${tempGif} -movflags faststart -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -y ${tempMp4}`)
+    execSync(`ffmpeg -stream_loop 50 -i ${tempMp4} -c copy -y ${output}`)
     console.log('Conversion completed successfully')
   } catch (error) {
     console.error(error)
   } finally {
-    // await rm(tempInput)
-    // await rm(tempDir)
+    await rm(tempWebp)
+    await rm(tempGif)
   }
 }
 

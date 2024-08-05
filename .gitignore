@@ -2,3 +2,5 @@ node_modules/
 **/*.webp
 **/*.mp4
 **/*.png
+
+dist/
